@@ -1,0 +1,29 @@
+server:
+  port: 8900
+
+spring:
+  application:
+    name: external-mq
+  profiles:
+    active: local
+  jpa:
+    open-in-view: false
+  flyway:
+    enabled: true
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,info
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+stub:
+  correlation:
+    key: input_id

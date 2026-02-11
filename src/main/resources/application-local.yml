@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: mq-stub
+    username: mq-stub
+    password: mq-stub
+  flyway:
+    enabled: true
+
+logging:
+  file:
+    path: ${user.home}/logs
+#  config: classpath:logging/logback-local.yml
