@@ -1,10 +1,10 @@
 package com.dmitriev.external.stub.config
 
+import com.dmitriev.external.stub.config.props.ArtemisProps
 import io.micrometer.observation.ObservationRegistry
 import jakarta.jms.ConnectionFactory
 import jakarta.jms.DeliveryMode
-import org.apache.activemq.ActiveMQConnectionFactory
-import org.springframework.beans.factory.annotation.Value
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.jms.annotation.EnableJms
@@ -12,16 +12,12 @@ import org.springframework.jms.core.JmsTemplate
 
 @EnableJms
 @Configuration
-class MqConfig {
+class MqConfig(
+    private val artemisProps: ArtemisProps,
+) {
     @Bean
-    fun connectionFactory(
-        @Value("\${activemq.user}") user: String,
-        @Value("\${activemq.password}") password: String,
-        @Value("\${activemq.broker-url}") brokerUrl: String,
-    ): ConnectionFactory {
-        val connectionFactory = ActiveMQConnectionFactory(user, password, brokerUrl)
-        connectionFactory.trustedPackages = listOf("com.dmitriev.mq.stub");
-        return connectionFactory;
+    fun connectionFactory(): ConnectionFactory {
+        return ActiveMQConnectionFactory(artemisProps.url, artemisProps.user, artemisProps.password)
     }
 
     @Bean

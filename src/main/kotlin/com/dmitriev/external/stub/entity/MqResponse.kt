@@ -10,10 +10,10 @@ class MqResponse(
     val headerKey: String?,
     val headerValue: String?,
     val queue: String,
-    val responsePayload: String,
+    val responseBody: String,
     @Enumerated(EnumType.STRING)
-    val requestType: PayloadType,
-    val requestMatchExpression: String?,
+    val payloadType: PayloadType,
+    val matchingExpression: String?,
     val delayInSec: Long,
     val deleteAfter: ZonedDateTime?,
 

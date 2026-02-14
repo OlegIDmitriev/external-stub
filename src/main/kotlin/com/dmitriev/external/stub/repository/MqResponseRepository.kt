@@ -14,21 +14,25 @@ interface MqResponseRepository: JpaRepository<MqResponse, Long> {
 
     fun existsByQueue(queue: String): Boolean
 
-    @Query("""
+    @Query(
+        """
         from MqResponse r where
         r.headerKey = :headerKey
         and r.headerValue = :headerValue
         and r.queue = :queue
-        order by r.requestMatchExpression, r.id
-    """)
+        order by r.matchingExpression, r.id
+    """
+    )
     fun findResponses(headerKey: String, headerValue: String, queue: String): List<MqResponse>
 
-    @Query("""
+    @Query(
+        """
         from MqResponse r where
         r.queue = :queue
         and r.headerKey is null
-        order by r.requestMatchExpression, r.id 
-    """)
+        order by r.matchingExpression, r.id 
+    """
+    )
     fun findDefaultResponses(queue: String): List<MqResponse>
 
     @Query("""

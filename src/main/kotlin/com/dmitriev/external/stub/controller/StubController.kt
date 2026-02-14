@@ -1,6 +1,7 @@
 package com.dmitriev.external.stub.controller
 
 import com.dmitriev.external.stub.service.SearchRestResponseService
+import io.swagger.v3.oas.annotations.Hidden
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod.*
 import org.springframework.web.bind.annotation.RestController
 
+@Hidden
 @RestController
 @RequestMapping("stub")
 class StubController(

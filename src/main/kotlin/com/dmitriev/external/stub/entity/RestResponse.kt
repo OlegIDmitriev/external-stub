@@ -11,7 +11,7 @@ class RestResponse(
     val headerValue: String?,
     @Enumerated(EnumType.STRING)
     val method: RequestMethod,
-    val requestPath: String,
+    val path: String,
     val responseStatus: Int,
     val responseBody: String?,
     val delayInSec: Long?,
@@ -19,6 +19,6 @@ class RestResponse(
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "restResponseSeq")
-    @SequenceGenerator(name = "restResponseSeq", sequenceName = "resr_response_seq", allocationSize = 1)
+    @SequenceGenerator(name = "restResponseSeq", sequenceName = "rest_response_seq", allocationSize = 1)
     var id: Long? = null,
 ) : Serializable

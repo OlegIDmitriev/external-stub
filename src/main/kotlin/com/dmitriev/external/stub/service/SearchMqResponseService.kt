@@ -52,11 +52,11 @@ class SearchMqResponseService(
 
             val matchingResponse = mqResponses.firstOrNull{ matches(it, requestBody) }
             if (matchingResponse != null) {
-                val matchingExp = matchingResponse.requestMatchExpression
+                val matchingExp = matchingResponse.matchingExpression
                 log.info("$queue, $correlationKey=$correlationValue matches=$matchingExp")
                 return matchingResponse
             } else {
-                val matchExps = mqResponses.map { it.requestMatchExpression }.joinToString(",")
+                val matchExps = mqResponses.map { it.matchingExpression }.joinToString(",")
                 log.warn("Matching response not found. Total stub responses: ${mqResponses.size} with match exp: $matchExps")
             }
         }
@@ -76,23 +76,23 @@ class SearchMqResponseService(
 
         val response = defaultResponses.firstOrNull {matches(it, requestBody)}
         if (response != null) {
-            val matchingExp = response.requestMatchExpression
+            val matchingExp = response.matchingExpression
             log.info("$queue, default answer matches=$matchingExp")
         } else {
-            val matchExps = defaultResponses.map { it.requestMatchExpression }.joinToString(",")
+            val matchExps = defaultResponses.map { it.matchingExpression }.joinToString(",")
             log.warn("Matching default response not found. Total stub responses: ${defaultResponses.size} with match exp: $matchExps")
         }
         return response
     }
 
     private fun matches(mqResponse: MqResponse, requestPayload: String): Boolean {
-        if (mqResponse.requestMatchExpression == null) {
+        if (mqResponse.matchingExpression == null) {
             return true
         }
 
-        return when (mqResponse.requestType) {
-            PayloadType.JSON -> jsonMatches(requestPayload, mqResponse.requestMatchExpression)
-            PayloadType.XML -> xmlMatches(requestPayload, mqResponse.requestMatchExpression)
+        return when (mqResponse.payloadType) {
+            PayloadType.JSON -> jsonMatches(requestPayload, mqResponse.matchingExpression)
+            PayloadType.XML -> xmlMatches(requestPayload, mqResponse.matchingExpression)
         }
     }
 

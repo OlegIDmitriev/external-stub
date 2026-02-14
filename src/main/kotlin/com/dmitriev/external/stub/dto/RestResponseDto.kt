@@ -27,7 +27,7 @@ data class RestResponseDto(
             headerKey = trimToNull(headerKey),
             headerValue = trimToNull(headerValue),
             method = method,
-            requestPath = trimToNull(requestPath),
+            path = trimToNull(requestPath),
             responseStatus = responseStatus ?: 200,
             responseBody = trimToNull(responseBody),
             delayInSec = delayInSec ?: 0L,
