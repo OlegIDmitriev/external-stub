@@ -20,7 +20,7 @@ class MqResponseHandler(
 
         if (response != null) {
             return MessageBuilder
-                .withPayload(response.responsePayload)
+                .withPayload(response.responseBody)
                 .copyHeaders(requestMessage.headers)
                 .setHeader("stubDelay", response.delayInSec)
                 .build()

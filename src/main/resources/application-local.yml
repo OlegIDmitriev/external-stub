@@ -1,12 +1,17 @@
 spring:
   datasource:
-    url: mq-stub
-    username: mq-stub
-    password: mq-stub
+    url: jdbc:postgresql://localhost:5432/postgres?currentSchema=external_stub
+    username: postgres
+    password: postgres
   flyway:
     enabled: true
+artemis:
+  url: tcp://localhost:61616
+  user:
+  password:
 
 logging:
   file:
     path: ${user.home}/logs
 #  config: classpath:logging/logback-local.yml
+

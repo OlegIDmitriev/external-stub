@@ -1,26 +1,26 @@
 # External Stub
 
-Заглушка для тестов/нагрузки/локальной разработки пр.
-Позволяет матчить запросы по хедерам и пэйлоаду и настраивать множественные варианты ответа
+A stub service for testing, load testing, local development, etc. It allows matching requests by headers and payload 
+and configuring multiple response variants.
 
-##### Для локального запуска требуется:
-* _Java_ 21+
-* _gradle_ 8+
+##### Requirements for Local Run:
+* _Java_ 25+
+* _gradle_ 9+
 * _postgres_ - localhost:5432/postgres (postgres:postgres)
 * _artemis_ - localhost:61616
 
 ##### Swagger
-Доступен Swagger по пути http://localhost:9999/swagger-ui/index.html
+Swagger is available at: http://localhost:9999/swagger-ui/index.html
 
-##### Добавление ответов для заглушения MQ очередей:
-###### Используя REST:
+##### Stubbing MQ Queues:
+###### Using REST:
 
-Вызвать
+call
 ```
 POST /response/mq
 ```
 
-В теле передать объект вида:
+Request body example:
 ```json
 {
   "headerKey": "correlationId",
@@ -33,54 +33,57 @@ POST /response/mq
   "ttlInSec": 0
 }
 ```
-| Field              | Type           | Required | Default value |                                                                                                                                                                             |
-|--------------------|----------------|----------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| headerKey          | String         |          |               | имя хедера из входящего сообщения по которому нужно матчить этот ответ. Если не задавать то будут заглушены все входящие запросы в эту очередь                              |
-| headerValue        | String         |          |               | значение хедера из входящего сообщения. Задается если указан headerKey                                                                                                      |
-| queue              | String         | *        |               | имя очереди                                                                                                                                                                 |
-| responseBody       | String         | *        |               | ответ который вернут заглушка                                                                                                                                               |
-| payloadType        | Enum: JSON/XML |          | JSON          | формат сообщения в очереди                                                                                                                                                  |
-| matchingExpression | String         |          |               | JsonPath/Xpath которому должен соответствовать payload запроса. Используется если нужно вернуть разные ответы для одной очереди в зависимости от пейлоада входящего запроса |
-| delayInSec         | Long           |          | 0             | Задержка в секундах перед тем как заглушка вернет ответ                                                                                                                     |
-| ttlInSec           | Long           |          | 0             | Период в секундах сколько будет храниться правило в сервисе. По умолчанию 1 день. Если указать 0 будет храниться бесрочно                                                   |
+| Field              | Type           | Required | Default value |                                                                                                                                                   |
+|--------------------|----------------|----------|---------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| headerKey          | String         |          |               | Name of the header from the incoming message used to match this response. If not specified, all incoming requests to the queue will be stubbed    |
+| headerValue        | String         |          |               | Value of the header from the incoming message. Used if _headerKey_ is specified                                                                   |
+| queue              | String         | *        |               | Queue name                                                                                                                                        |
+| responseBody       | String         | *        |               | Response returned by the stub                                                                                                                     |
+| payloadType        | Enum: JSON/XML |          | JSON          | Message format in the queue.                                                                                                                      |
+| matchingExpression | String         |          |               | JsonPath/XPath that the request payload must match. Used when returning different responses for the same queue depending on the incoming payload  |
+| delayInSec         | Long           |          | 0             | Delay in seconds before the stub returns a response                                                                                           |
+| ttlInSec           | Long           |          | 0             | Time in seconds the rule is stored in the service. Default is 1 day. If set to 0, it is stored indefinitely                         |
 
-###### Через БД
-Таблица _external_stub.mq_response_
+###### Via Database
+Table _external_stub.mq_response_
 
-| Field               | Type                     | NULLABLE |                                                                                                                                                                             |
-|---------------------|--------------------------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| header_key          | varchar                  |          | имя хедера из входящего сообщения по которому нужно матчить этот ответ. Если не задавать то будут заглушены все входящие запросы в эту очередь                              |
-| header_value        | varchar                  |          | значение хедера из входящего сообщения. Задается если указан headerKey                                                                                                      |
-| queue               | varchar                  |          | имя очереди                                                                                                                                                                 |
-| response_body       | varchar                  |          | ответ который вернут заглушка                                                                                                                                               |
-| payload_type        | Enum: JSON/XML           |          | формат сообщения в очереди                                                                                                                                                  |
-| matching_expression | varchar                  |          | JsonPath/Xpath которому должен соответствовать payload запроса. Используется если нужно вернуть разные ответы для одной очереди в зависимости от пейлоада входящего запроса |
-| delay_in_sec        | long                     |          | Задержка в секундах перед тем как заглушка вернет ответ                                                                                                                     |
-| ttl_in_sec          | timestamp with time zone | *        | ДатаВремя после которого запись из БД будет удалена                                                                                                                         |
+| Field               | Type                     | NULLABLE |                                                                                                                                                  |
+|---------------------|--------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| header_key          | varchar                  |          | Name of the header from the incoming message used to match this response. If not specified, all incoming requests to the queue will be stubbed   |
+| header_value        | varchar                  |          | Value of the header from the incoming message. Used if _header_key_ is specified                                                                 |
+| queue               | varchar                  |          | Queue name                                                                                                                                       |
+| response_body       | varchar                  |          | Response returned by the stub                                                                                                                    |
+| payload_type        | Enum: JSON/XML           |          | Message format in the queue                                                                                                                      |
+| matching_expression | varchar                  |          | JsonPath/XPath that the request payload must match. Used when returning different responses for the same queue depending on the incoming payload |
+| delay_in_sec        | long                     |          | Delay in seconds before the stub returns a response                                                                                              |
+| ttl_in_sec          | timestamp with time zone | *        | DateTime after which the record will be removed from the database                                                                                |
 
-Чтобы приложение стал слушать очередь добавленную через БД, необходимо вызвать REST: `POST /response/mq/reload`
+To make the application start listening to a queue added via DB, call the next REST: `POST /response/mq/reload`
 
-Матчинг по JsonPath/XPath работает как поиск в пейлоаде нод/элементов которые удовлетворяют заданному выражению. 
-Если таких нод более 0 считается что пэйлоад матчится по заданному выражению
-##### Примеры JsonPath
-| JsonPath                                     | Description                                                                                                                     |
-|----------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
-| $.[?(@.fieldName == 'fieldValue')]           | В json есть поле fieldName (на любой глубине, но не внутри массива) со значением fieldValue                                     |
-| $..fieldName                                 | В json есть поле fieldName (на любой глубине)                                                                                   |
-| $..arrayName[?(@.fieldName == 'fieldValue')] | В json есть поле arrayName которое является массивом и в нем есть элемент у которого есть поле fieldName со значеним fieldValue |
+##### JsonPath/XPath Matching
 
-##### Примеры XPath
-| XPath        | Description                                               |
-|--------------|-----------------------------------------------------------|
-| //XmlElement | В xml есть элемент с именем XmlElement (на любой глубине) |
+Matching by JsonPath/XPath works as a search for payload nodes/elements that satisfy the specified expression.
+If exists at least one matching node, the payload is considered a match
+
+###### JsonPath examples
+| JsonPath                                     | Description                                                                                            |
+|----------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| $.[?(@.fieldName == 'fieldValue')]           | JSON contains a field _fieldName_ (at any depth, but not inside an array) with value _fieldValue_      |
+| $..fieldName                                 | JSON contains a field _fieldName_ at any depth                                                         |
+| $..arrayName[?(@.fieldName == 'fieldValue')] | SON contains an array _arrayName_ with an element that has a field _fieldName_ equal to _fieldValue_   |
+
+###### XPath examples
+| XPath        | Description                                            |
+|--------------|--------------------------------------------------------|
+| //XmlElement | XML contains an element named XmlElement at any depth  |
 
 
 
-##### Добавление ответов для заглушения REST очередей
-###### Через REST
+##### Stubbing REST Endpoints
+###### Using REST
 
-Вызвать `POST /response/rest`
-В теле передать объект вида:
+Call REST `POST /response/rest`
+Request body example:
 ```json
 {
   "headerKey": "correlationId",
@@ -93,16 +96,16 @@ POST /response/mq
   "ttlInSec": 0
 }
 ```
-| Field          | Type   | Required | Default |                                                                                                                           |
-|----------------|--------|----------|---------|---------------------------------------------------------------------------------------------------------------------------|
-| headerKey      | String |          |         | имя хедера из запроса                                                                                                     |
-| headerValue    | String |          |         | значение хедера из запроса                                                                                                |
-| method         | String | *        |         | GET, PUT, POST, PATCH, DELETE                                                                                             |
-| path           | String | *        |         | Mocked Rest method path                                                                                                   |
-| responseStatus | Int    |          | 200     | Http response code                                                                                                        |
-| responseBody   | String | *        |         | Http response body                                                                                                        |
-| delayInSec     | Long   |          | 0       | Задержка в секундах перед тем как заглушка вернет ответ                                                                   |
-| ttlInSec       | Long   |          | 0       | Период в секундах сколько будет храниться правило в сервисе. По умолчанию 1 день. Если указать 0 будет храниться бесрочно |
+| Field          | Type   | Required | Default |                                                                                                              |
+|----------------|--------|----------|---------|--------------------------------------------------------------------------------------------------------------|
+| headerKey      | String |          |         | Request header name                                                                                          |
+| headerValue    | String |          |         | Request header value                                                                                         |
+| method         | String | *        |         | Request method: GET, PUT, POST, PATCH, DELETE                                                                |
+| path           | String | *        |         | Mocked Rest method path                                                                                      |
+| responseStatus | Int    |          | 200     | Http response code                                                                                           |
+| responseBody   | String | *        |         | Http response body                                                                                           |
+| delayInSec     | Long   |          | 0       | Delay in seconds before the stub returns a response                                                          |
+| ttlInSec       | Long   |          | 0       | Time in seconds the rule is stored in the service. Default is 1 day. If set to 0, it is stored indefinitely  |
 
-Либо можно через БД добавить в таблицу _external_stub.rest_response_ (дергать REST после этого не нужно)
-!!! На стороне приложения которое должно вызывать заглушаемый REST нужно указать url вида `http://<stubber-host>:9999/stub`
+Alternatively, you can add records directly to the table: _external_stub.rest_response_ (No need to call REST afterward.)
+⚠ On the client application side (which calls the stubbed REST service), the URL must be set to: `http://<stubber-host>:9999/stub`

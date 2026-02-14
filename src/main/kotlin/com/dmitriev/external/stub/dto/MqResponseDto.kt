@@ -27,9 +27,9 @@ data class MqResponseDto(
             headerKey = trimToNull(headerKey),
             headerValue = trimToNull(headerValue),
             queue = trimToNull(queue),
-            responsePayload = trimToNull(responsePayload),
-            requestType = requestType ?: PayloadType.JSON,
-            requestMatchExpression = trimToNull(requestMatchExpression),
+            responseBody = trimToNull(responsePayload),
+            payloadType = requestType ?: PayloadType.JSON,
+            matchingExpression = trimToNull(requestMatchExpression),
             delayInSec = delayInSec ?: 0L,
             deleteAfter = deleteAfter,
         )
